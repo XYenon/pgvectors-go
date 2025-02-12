@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"math"
@@ -8,42 +8,42 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type PgItem struct {
 	tableName struct{} `pg:"pg_items"`
 
 	Id              int64
-	Embedding       pgvector.Vector       `pg:"type:vector(3)"`
-	HalfEmbedding   pgvector.HalfVector   `pg:"type:halfvec(3)"`
-	BinaryEmbedding string                `pg:"type:bit(3)"`
-	SparseEmbedding pgvector.SparseVector `pg:"type:sparsevec(3)"`
-	Embeddings      []pgvector.Vector     `pg:"type:vector(3)[]"`
+	Embedding       pgvectors.Vector       `pg:"type:vector(3)"`
+	HalfEmbedding   pgvectors.HalfVector   `pg:"type:halfvec(3)"`
+	BinaryEmbedding string                 `pg:"type:bit(3)"`
+	SparseEmbedding pgvectors.SparseVector `pg:"type:sparsevec(3)"`
+	Embeddings      []pgvectors.Vector     `pg:"type:vector(3)[]"`
 }
 
 func CreatePgItems(db *pg.DB) {
 	items := []PgItem{
 		PgItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 1}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 1}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 1}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 1}),
 			BinaryEmbedding: "000",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 1}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 1})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 1}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 1})},
 		},
 		PgItem{
-			Embedding:       pgvector.NewVector([]float32{2, 2, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{2, 2, 2}),
+			Embedding:       pgvectors.NewVector([]float32{2, 2, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{2, 2, 2}),
 			BinaryEmbedding: "101",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{2, 2, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{2, 2, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{2, 2, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{2, 2, 2})},
 		},
 		PgItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 2}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 2}),
 			BinaryEmbedding: "111",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})},
 		},
 	}
 
@@ -78,7 +78,7 @@ func TestPg(t *testing.T) {
 	CreatePgItems(db)
 
 	var items []PgItem
-	err = db.Model(&items).OrderExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 1, 1})).Limit(5).Select()
+	err = db.Model(&items).OrderExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 1, 1})).Limit(5).Select()
 	if err != nil {
 		panic(err)
 	}
@@ -97,12 +97,12 @@ func TestPg(t *testing.T) {
 	if !reflect.DeepEqual(items[1].SparseEmbedding.Slice(), []float32{1, 1, 2}) {
 		t.Error()
 	}
-	if !reflect.DeepEqual(items[1].Embeddings, []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})}) {
+	if !reflect.DeepEqual(items[1].Embeddings, []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})}) {
 		t.Error()
 	}
 
 	var distances []float64
-	err = db.Model(&items).ColumnExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 1, 1})).Order("id").Select(&distances)
+	err = db.Model(&items).ColumnExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 1, 1})).Order("id").Select(&distances)
 	if err != nil {
 		panic(err)
 	}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type VectorCodec struct{}
@@ -20,7 +20,7 @@ func (VectorCodec) PreferredFormat() int16 {
 }
 
 func (VectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, value any) pgtype.EncodePlan {
-	_, ok := value.(pgvector.Vector)
+	_, ok := value.(pgvectors.Vector)
 	if !ok {
 		return nil
 	}
@@ -38,20 +38,20 @@ func (VectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, value any
 type encodePlanVectorCodecBinary struct{}
 
 func (encodePlanVectorCodecBinary) Encode(value any, buf []byte) (newBuf []byte, err error) {
-	v := value.(pgvector.Vector)
+	v := value.(pgvectors.Vector)
 	return v.EncodeBinary(buf)
 }
 
 type encodePlanVectorCodecText struct{}
 
 func (encodePlanVectorCodecText) Encode(value any, buf []byte) (newBuf []byte, err error) {
-	v := value.(pgvector.Vector)
+	v := value.(pgvectors.Vector)
 	// use String() for now to avoid adding another method to Vector
 	return append(buf, v.String()...), nil
 }
 
 func (VectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, target any) pgtype.ScanPlan {
-	_, ok := target.(*pgvector.Vector)
+	_, ok := target.(*pgvectors.Vector)
 	if !ok {
 		return nil
 	}
@@ -69,14 +69,14 @@ func (VectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, target any)
 type scanPlanVectorCodecBinary struct{}
 
 func (scanPlanVectorCodecBinary) Scan(src []byte, dst any) error {
-	v := (dst).(*pgvector.Vector)
+	v := (dst).(*pgvectors.Vector)
 	return v.DecodeBinary(src)
 }
 
 type scanPlanVectorCodecText struct{}
 
 func (scanPlanVectorCodecText) Scan(src []byte, dst any) error {
-	v := (dst).(*pgvector.Vector)
+	v := (dst).(*pgvectors.Vector)
 	return v.Scan(src)
 }
 
@@ -89,7 +89,7 @@ func (c VectorCodec) DecodeValue(m *pgtype.Map, oid uint32, format int16, src []
 		return nil, nil
 	}
 
-	var vec pgvector.Vector
+	var vec pgvectors.Vector
 	scanPlan := c.PlanScan(m, oid, format, &vec)
 	if scanPlan == nil {
 		return nil, fmt.Errorf("Unable to decode vector type")

@@ -1,4 +1,4 @@
-module github.com/pgvector/pgvector-go
+module github.com/xyenon/pgvectors-go
 
 go 1.21
 

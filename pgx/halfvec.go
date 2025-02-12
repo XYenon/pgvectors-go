@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type HalfVectorCodec struct{}
@@ -20,7 +20,7 @@ func (HalfVectorCodec) PreferredFormat() int16 {
 }
 
 func (HalfVectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, value any) pgtype.EncodePlan {
-	_, ok := value.(pgvector.HalfVector)
+	_, ok := value.(pgvectors.HalfVector)
 	if !ok {
 		return nil
 	}
@@ -35,14 +35,14 @@ func (HalfVectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, value
 type encodePlanHalfVectorCodecText struct{}
 
 func (encodePlanHalfVectorCodecText) Encode(value any, buf []byte) (newBuf []byte, err error) {
-	v := value.(pgvector.HalfVector)
+	v := value.(pgvectors.HalfVector)
 	return v.EncodeText(buf)
 }
 
 type scanPlanHalfVectorCodecText struct{}
 
 func (HalfVectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, target any) pgtype.ScanPlan {
-	_, ok := target.(*pgvector.HalfVector)
+	_, ok := target.(*pgvectors.HalfVector)
 	if !ok {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (HalfVectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, target 
 }
 
 func (scanPlanHalfVectorCodecText) Scan(src []byte, dst any) error {
-	v := (dst).(*pgvector.HalfVector)
+	v := (dst).(*pgvectors.HalfVector)
 	return v.Scan(src)
 }
 
@@ -68,7 +68,7 @@ func (c HalfVectorCodec) DecodeValue(m *pgtype.Map, oid uint32, format int16, sr
 		return nil, nil
 	}
 
-	var vec pgvector.HalfVector
+	var vec pgvectors.HalfVector
 	scanPlan := c.PlanScan(m, oid, format, &vec)
 	if scanPlan == nil {
 		return nil, fmt.Errorf("Unable to decode halfvec type")

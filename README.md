@@ -1,17 +1,17 @@
-# pgvector-go
+# pgvectors-go
 
-[pgvector](https://github.com/pgvector/pgvector) support for Go
+[pgvecto.rs](https://github.com/tensorchord/pgvecto.rs) and [pgvector](https://github.com/pgvector/pgvector) support for Go
 
 Supports [pgx](https://github.com/jackc/pgx), [pg](https://github.com/go-pg/pg), [Bun](https://github.com/uptrace/bun), [Ent](https://github.com/ent/ent), [GORM](https://github.com/go-gorm/gorm), and [sqlx](https://github.com/jmoiron/sqlx)
 
-[![Build Status](https://github.com/pgvector/pgvector-go/actions/workflows/build.yml/badge.svg)](https://github.com/pgvector/pgvector-go/actions)
+[![Build Status](https://github.com/xyenon/pgvectors-go/actions/workflows/build.yml/badge.svg)](https://github.com/xyenon/pgvectors-go/actions)
 
 ## Getting Started
 
 Run:
 
 ```sh
-go get github.com/pgvector/pgvector-go
+go get github.com/xyenon/pgvectors-go
 ```
 
 And follow the instructions for your database library:
@@ -39,28 +39,28 @@ Import the packages
 
 ```go
 import (
-    "github.com/pgvector/pgvector-go"
-    pgxvector "github.com/pgvector/pgvector-go/pgx"
+    "github.com/xyenon/pgvectors-go"
+    pgxvectors "github.com/xyenon/pgvectors-go/pgx"
 )
 ```
 
 Enable the extension
 
 ```go
-_, err := conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+_, err := conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Register the types with the connection
 
 ```go
-err := pgxvector.RegisterTypes(ctx, conn)
+err := pgxvectors.RegisterTypes(ctx, conn)
 ```
 
 or the pool
 
 ```go
 config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-    return pgxvector.RegisterTypes(ctx, conn)
+    return pgxvectors.RegisterTypes(ctx, conn)
 }
 ```
 
@@ -73,13 +73,13 @@ _, err := conn.Exec(ctx, "CREATE TABLE items (id bigserial PRIMARY KEY, embeddin
 Insert a vector
 
 ```go
-_, err := conn.Exec(ctx, "INSERT INTO items (embedding) VALUES ($1)", pgvector.NewVector([]float32{1, 2, 3}))
+_, err := conn.Exec(ctx, "INSERT INTO items (embedding) VALUES ($1)", pgvectors.NewVector([]float32{1, 2, 3}))
 ```
 
 Get the nearest neighbors to a vector
 
 ```go
-rows, err := conn.Query(ctx, "SELECT id FROM items ORDER BY embedding <-> $1 LIMIT 5", pgvector.NewVector([]float32{1, 2, 3}))
+rows, err := conn.Query(ctx, "SELECT id FROM items ORDER BY embedding <-> $1 LIMIT 5", pgvectors.NewVector([]float32{1, 2, 3}))
 ```
 
 Add an approximate index
@@ -99,20 +99,20 @@ See a [full example](pgx_test.go)
 Import the package
 
 ```go
-import "github.com/pgvector/pgvector-go"
+import "github.com/xyenon/pgvectors-go"
 ```
 
 Enable the extension
 
 ```go
-_, err := db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+_, err := db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Add a vector column
 
 ```go
 type Item struct {
-    Embedding pgvector.Vector `pg:"type:vector(3)"`
+    Embedding pgvectors.Vector `pg:"type:vector(3)"`
 }
 ```
 
@@ -120,7 +120,7 @@ Insert a vector
 
 ```go
 item := Item{
-    Embedding: pgvector.NewVector([]float32{1, 2, 3}),
+    Embedding: pgvectors.NewVector([]float32{1, 2, 3}),
 }
 _, err := db.Model(&item).Insert()
 ```
@@ -130,7 +130,7 @@ Get the nearest neighbors to a vector
 ```go
 var items []Item
 err := db.Model(&items).
-    OrderExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 2, 3})).
+    OrderExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 2, 3})).
     Limit(5).
     Select()
 ```
@@ -152,20 +152,20 @@ See a [full example](pg_test.go)
 Import the package
 
 ```go
-import "github.com/pgvector/pgvector-go"
+import "github.com/xyenon/pgvectors-go"
 ```
 
 Enable the extension
 
 ```go
-_, err := db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+_, err := db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Add a vector column
 
 ```go
 type Item struct {
-    Embedding pgvector.Vector `bun:"type:vector(3)"`
+    Embedding pgvectors.Vector `bun:"type:vector(3)"`
 }
 ```
 
@@ -173,7 +173,7 @@ Insert a vector
 
 ```go
 item := Item{
-    Embedding: pgvector.NewVector([]float32{1, 2, 3}),
+    Embedding: pgvectors.NewVector([]float32{1, 2, 3}),
 }
 _, err := db.NewInsert().Model(&item).Exec(ctx)
 ```
@@ -184,7 +184,7 @@ Get the nearest neighbors to a vector
 var items []Item
 err := db.NewSelect().
     Model(&items).
-    OrderExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 2, 3})).
+    OrderExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 2, 3})).
     Limit(5).
     Scan(ctx)
 ```
@@ -214,13 +214,13 @@ See a [full example](bun_test.go)
 Import the package
 
 ```go
-import "github.com/pgvector/pgvector-go"
+import "github.com/xyenon/pgvectors-go"
 ```
 
 Enable the extension (requires the [sql/execquery](https://entgo.io/docs/feature-flags/#sql-raw-api) feature)
 
 ```go
-_, err := client.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+_, err := client.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Add a vector column
@@ -228,7 +228,7 @@ Add a vector column
 ```go
 func (Item) Fields() []ent.Field {
     return []ent.Field{
-        field.Other("embedding", pgvector.Vector{}).
+        field.Other("embedding", pgvectors.Vector{}).
             SchemaType(map[string]string{
                 dialect.Postgres: "vector(3)",
             }),
@@ -241,7 +241,7 @@ Insert a vector
 ```go
 _, err := client.Item.
     Create().
-    SetEmbedding(pgvector.NewVector([]float32{1, 2, 3})).
+    SetEmbedding(pgvectors.NewVector([]float32{1, 2, 3})).
     Save(ctx)
 ```
 
@@ -251,7 +251,7 @@ Get the nearest neighbors to a vector
 items, err := client.Item.
     Query().
     Order(func(s *sql.Selector) {
-        s.OrderExpr(sql.ExprP("embedding <-> $1", pgvector.NewVector([]float32{1, 2, 3})))
+        s.OrderExpr(sql.ExprP("embedding <-> $1", pgvectors.NewVector([]float32{1, 2, 3})))
     }).
     Limit(5).
     All(ctx)
@@ -280,20 +280,20 @@ See a [full example](ent_test.go)
 Import the package
 
 ```go
-import "github.com/pgvector/pgvector-go"
+import "github.com/xyenon/pgvectors-go"
 ```
 
 Enable the extension
 
 ```go
-db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Add a vector column
 
 ```go
 type Item struct {
-    Embedding pgvector.Vector `gorm:"type:vector(3)"`
+    Embedding pgvectors.Vector `gorm:"type:vector(3)"`
 }
 ```
 
@@ -301,7 +301,7 @@ Insert a vector
 
 ```go
 item := Item{
-    Embedding: pgvector.NewVector([]float32{1, 2, 3}),
+    Embedding: pgvectors.NewVector([]float32{1, 2, 3}),
 }
 result := db.Create(&item)
 ```
@@ -311,7 +311,7 @@ Get the nearest neighbors to a vector
 ```go
 var items []Item
 db.Clauses(clause.OrderBy{
-    Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []interface{}{pgvector.NewVector([]float32{1, 1, 1})}},
+    Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []interface{}{pgvectors.NewVector([]float32{1, 1, 1})}},
 }).Limit(5).Find(&items)
 ```
 
@@ -332,20 +332,20 @@ See a [full example](gorm_test.go)
 Import the package
 
 ```go
-import "github.com/pgvector/pgvector-go"
+import "github.com/xyenon/pgvectors-go"
 ```
 
 Enable the extension
 
 ```go
-db.MustExec("CREATE EXTENSION IF NOT EXISTS vector")
+db.MustExec("CREATE EXTENSION IF NOT EXISTS vectors")
 ```
 
 Add a vector column
 
 ```go
 type Item struct {
-    Embedding pgvector.Vector
+    Embedding pgvectors.Vector
 }
 ```
 
@@ -353,7 +353,7 @@ Insert a vector
 
 ```go
 item := Item{
-    Embedding: pgvector.NewVector([]float32{1, 2, 3}),
+    Embedding: pgvectors.NewVector([]float32{1, 2, 3}),
 }
 _, err := db.NamedExec(`INSERT INTO items (embedding) VALUES (:embedding)`, item)
 ```
@@ -362,7 +362,7 @@ Get the nearest neighbors to a vector
 
 ```go
 var items []Item
-db.Select(&items, "SELECT * FROM items ORDER BY embedding <-> $1 LIMIT 5", pgvector.NewVector([]float32{1, 1, 1}))
+db.Select(&items, "SELECT * FROM items ORDER BY embedding <-> $1 LIMIT 5", pgvectors.NewVector([]float32{1, 1, 1}))
 ```
 
 Add an approximate index
@@ -379,22 +379,22 @@ See a [full example](sqlx_test.go)
 
 ## History
 
-View the [changelog](https://github.com/pgvector/pgvector-go/blob/master/CHANGELOG.md)
+View the [changelog](https://github.com/xyenon/pgvectors-go/blob/master/CHANGELOG.md)
 
 ## Contributing
 
 Everyone is encouraged to help improve this project. Here are a few ways you can help:
 
-- [Report bugs](https://github.com/pgvector/pgvector-go/issues)
-- Fix bugs and [submit pull requests](https://github.com/pgvector/pgvector-go/pulls)
+- [Report bugs](https://github.com/xyenon/pgvectors-go/issues)
+- Fix bugs and [submit pull requests](https://github.com/xyenon/pgvectors-go/pulls)
 - Write, clarify, or fix documentation
 - Suggest or add new features
 
 To get started with development:
 
 ```sh
-git clone https://github.com/pgvector/pgvector-go.git
-cd pgvector-go
+git clone https://github.com/xyenon/pgvectors-go.git
+cd pgvectors-go
 go mod tidy
 createdb pgvector_go_test
 go generate ./ent

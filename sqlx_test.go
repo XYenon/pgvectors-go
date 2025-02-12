@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"reflect"
@@ -6,36 +6,36 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type SqlxItem struct {
 	Id              int64
-	Embedding       pgvector.Vector
-	HalfEmbedding   pgvector.HalfVector
+	Embedding       pgvectors.Vector
+	HalfEmbedding   pgvectors.HalfVector
 	BinaryEmbedding string
-	SparseEmbedding pgvector.SparseVector
+	SparseEmbedding pgvectors.SparseVector
 }
 
 func CreateSqlxItems(db *sqlx.DB) {
 	items := []SqlxItem{
 		SqlxItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 1}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 1}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 1}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 1}),
 			BinaryEmbedding: "000",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 1}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 1}),
 		},
 		SqlxItem{
-			Embedding:       pgvector.NewVector([]float32{2, 2, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{2, 2, 2}),
+			Embedding:       pgvectors.NewVector([]float32{2, 2, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{2, 2, 2}),
 			BinaryEmbedding: "101",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{2, 2, 2}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{2, 2, 2}),
 		},
 		SqlxItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 2}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 2}),
 			BinaryEmbedding: "111",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 2}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 2}),
 		},
 	}
 
@@ -58,7 +58,7 @@ func TestSqlx(t *testing.T) {
 	CreateSqlxItems(db)
 
 	var items []SqlxItem
-	db.Select(&items, "SELECT * FROM sqlx_items ORDER BY embedding <-> $1 LIMIT 5", pgvector.NewVector([]float32{1, 1, 1}))
+	db.Select(&items, "SELECT * FROM sqlx_items ORDER BY embedding <-> $1 LIMIT 5", pgvectors.NewVector([]float32{1, 1, 1}))
 	if items[0].Id != 1 || items[1].Id != 3 || items[2].Id != 2 {
 		t.Error()
 	}

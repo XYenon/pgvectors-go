@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"context"
@@ -8,21 +8,21 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pgvector/pgvector-go"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type BunItem struct {
 	bun.BaseModel `bun:"table:bun_items"`
 
-	Id              int64                 `bun:",pk,autoincrement"`
-	Embedding       pgvector.Vector       `bun:"type:vector(3)"`
-	HalfEmbedding   pgvector.HalfVector   `bun:"type:halfvec(3)"`
-	BinaryEmbedding string                `bun:"type:bit(3)"`
-	SparseEmbedding pgvector.SparseVector `bun:"type:sparsevec(3)"`
-	Embeddings      []pgvector.Vector     `bun:"type:vector(3)[]"`
+	Id              int64                  `bun:",pk,autoincrement"`
+	Embedding       pgvectors.Vector       `bun:"type:vector(3)"`
+	HalfEmbedding   pgvectors.HalfVector   `bun:"type:halfvec(3)"`
+	BinaryEmbedding string                 `bun:"type:bit(3)"`
+	SparseEmbedding pgvectors.SparseVector `bun:"type:sparsevec(3)"`
+	Embeddings      []pgvectors.Vector     `bun:"type:vector(3)[]"`
 }
 
 var _ bun.AfterCreateTableHook = (*BunItem)(nil)
@@ -40,25 +40,25 @@ func (*BunItem) AfterCreateTable(ctx context.Context, query *bun.CreateTableQuer
 func CreateBunItems(ctx context.Context, db *bun.DB) {
 	items := []BunItem{
 		BunItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 1}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 1}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 1}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 1}),
 			BinaryEmbedding: "000",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 1}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 1})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 1}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 1})},
 		},
 		BunItem{
-			Embedding:       pgvector.NewVector([]float32{2, 2, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{2, 2, 2}),
+			Embedding:       pgvectors.NewVector([]float32{2, 2, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{2, 2, 2}),
 			BinaryEmbedding: "101",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{2, 2, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{2, 2, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{2, 2, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{2, 2, 2})},
 		},
 		BunItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 2}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 2}),
 			BinaryEmbedding: "111",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})},
 		},
 	}
 
@@ -90,7 +90,7 @@ func TestBun(t *testing.T) {
 	CreateBunItems(ctx, db)
 
 	var items []BunItem
-	err = db.NewSelect().Model(&items).OrderExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 1, 1})).Limit(5).Scan(ctx)
+	err = db.NewSelect().Model(&items).OrderExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 1, 1})).Limit(5).Scan(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -109,12 +109,12 @@ func TestBun(t *testing.T) {
 	if !reflect.DeepEqual(items[1].SparseEmbedding.Slice(), []float32{1, 1, 2}) {
 		t.Error()
 	}
-	if !reflect.DeepEqual(items[1].Embeddings, []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})}) {
+	if !reflect.DeepEqual(items[1].Embeddings, []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})}) {
 		t.Error()
 	}
 
 	var distances []float64
-	err = db.NewSelect().Model(&items).ColumnExpr("embedding <-> ?", pgvector.NewVector([]float32{1, 1, 1})).Order("id").Scan(ctx, &distances)
+	err = db.NewSelect().Model(&items).ColumnExpr("embedding <-> ?", pgvectors.NewVector([]float32{1, 1, 1})).Order("id").Scan(ctx, &distances)
 	if err != nil {
 		panic(err)
 	}

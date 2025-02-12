@@ -1,4 +1,4 @@
-package pgvector
+package pgvectors
 
 import (
 	"database/sql"

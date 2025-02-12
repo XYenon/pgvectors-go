@@ -6,8 +6,8 @@ import (
 	"math/rand"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pgvector/pgvector-go"
-	pgxvector "github.com/pgvector/pgvector-go/pgx"
+	"github.com/xyenon/pgvectors-go"
+	pgxvectors "github.com/xyenon/pgvectors-go/pgx"
 )
 
 func main() {
@@ -33,12 +33,12 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}
 
-	err = pgxvector.RegisterTypes(ctx, conn)
+	err = pgxvectors.RegisterTypes(ctx, conn)
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +67,7 @@ func main() {
 			if i%10000 == 0 {
 				fmt.Printf(".")
 			}
-			return []interface{}{pgvector.NewVector(embeddings[i])}, nil
+			return []interface{}{pgvectors.NewVector(embeddings[i])}, nil
 		}),
 	)
 	if err != nil {

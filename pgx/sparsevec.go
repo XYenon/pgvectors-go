@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 type SparseVectorCodec struct{}
@@ -20,7 +20,7 @@ func (SparseVectorCodec) PreferredFormat() int16 {
 }
 
 func (SparseVectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, value any) pgtype.EncodePlan {
-	_, ok := value.(pgvector.SparseVector)
+	_, ok := value.(pgvectors.SparseVector)
 	if !ok {
 		return nil
 	}
@@ -38,20 +38,20 @@ func (SparseVectorCodec) PlanEncode(m *pgtype.Map, oid uint32, format int16, val
 type encodePlanSparseVectorCodecBinary struct{}
 
 func (encodePlanSparseVectorCodecBinary) Encode(value any, buf []byte) (newBuf []byte, err error) {
-	v := value.(pgvector.SparseVector)
+	v := value.(pgvectors.SparseVector)
 	return v.EncodeBinary(buf)
 }
 
 type encodePlanSparseVectorCodecText struct{}
 
 func (encodePlanSparseVectorCodecText) Encode(value any, buf []byte) (newBuf []byte, err error) {
-	v := value.(pgvector.SparseVector)
+	v := value.(pgvectors.SparseVector)
 	// use String() for now to avoid adding another method to SparseVector
 	return append(buf, v.String()...), nil
 }
 
 func (SparseVectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, target any) pgtype.ScanPlan {
-	_, ok := target.(*pgvector.SparseVector)
+	_, ok := target.(*pgvectors.SparseVector)
 	if !ok {
 		return nil
 	}
@@ -69,14 +69,14 @@ func (SparseVectorCodec) PlanScan(m *pgtype.Map, oid uint32, format int16, targe
 type scanPlanSparseVectorCodecBinary struct{}
 
 func (scanPlanSparseVectorCodecBinary) Scan(src []byte, dst any) error {
-	v := (dst).(*pgvector.SparseVector)
+	v := (dst).(*pgvectors.SparseVector)
 	return v.DecodeBinary(src)
 }
 
 type scanPlanSparseVectorCodecText struct{}
 
 func (scanPlanSparseVectorCodecText) Scan(src []byte, dst any) error {
-	v := (dst).(*pgvector.SparseVector)
+	v := (dst).(*pgvectors.SparseVector)
 	return v.Scan(src)
 }
 
@@ -89,7 +89,7 @@ func (c SparseVectorCodec) DecodeValue(m *pgtype.Map, oid uint32, format int16, 
 		return nil, nil
 	}
 
-	var vec pgvector.SparseVector
+	var vec pgvectors.SparseVector
 	scanPlan := c.PlanScan(m, oid, format, &vec)
 	if scanPlan == nil {
 		return nil, fmt.Errorf("Unable to decode sparsevec type")

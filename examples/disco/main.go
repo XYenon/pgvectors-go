@@ -6,8 +6,8 @@ import (
 
 	"github.com/ankane/disco-go"
 	"github.com/jackc/pgx/v5"
-	"github.com/pgvector/pgvector-go"
-	pgxvector "github.com/pgvector/pgvector-go/pgx"
+	"github.com/xyenon/pgvectors-go"
+	pgxvectors "github.com/xyenon/pgvectors-go/pgx"
 )
 
 func main() {
@@ -19,12 +19,12 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}
 
-	err = pgxvector.RegisterTypes(ctx, conn)
+	err = pgxvectors.RegisterTypes(ctx, conn)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +61,7 @@ func main() {
 
 	for _, userId := range recommender.UserIds() {
 		factors := recommender.UserFactors(userId)
-		_, err := conn.Exec(ctx, "INSERT INTO users (id, factors) VALUES ($1, $2)", userId, pgvector.NewVector(factors))
+		_, err := conn.Exec(ctx, "INSERT INTO users (id, factors) VALUES ($1, $2)", userId, pgvectors.NewVector(factors))
 		if err != nil {
 			panic(err)
 		}
@@ -69,7 +69,7 @@ func main() {
 
 	for _, itemId := range recommender.ItemIds() {
 		factors := recommender.ItemFactors(itemId)
-		_, err := conn.Exec(ctx, "INSERT INTO movies (name, factors) VALUES ($1, $2)", itemId, pgvector.NewVector(factors))
+		_, err := conn.Exec(ctx, "INSERT INTO movies (name, factors) VALUES ($1, $2)", itemId, pgvectors.NewVector(factors))
 		if err != nil {
 			panic(err)
 		}

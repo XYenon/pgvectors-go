@@ -1,11 +1,11 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"math"
 	"reflect"
 	"testing"
 
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -13,31 +13,31 @@ import (
 
 type GormItem struct {
 	gorm.Model
-	Embedding       pgvector.Vector       `gorm:"type:vector(3)"`
-	HalfEmbedding   pgvector.HalfVector   `gorm:"type:halfvec(3)"`
-	BinaryEmbedding string                `gorm:"type:bit(3)"`
-	SparseEmbedding pgvector.SparseVector `gorm:"type:sparsevec(3)"`
+	Embedding       pgvectors.Vector       `gorm:"type:vector(3)"`
+	HalfEmbedding   pgvectors.HalfVector   `gorm:"type:halfvec(3)"`
+	BinaryEmbedding string                 `gorm:"type:bit(3)"`
+	SparseEmbedding pgvectors.SparseVector `gorm:"type:sparsevec(3)"`
 }
 
 func CreateGormItems(db *gorm.DB) {
 	items := []GormItem{
 		GormItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 1}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 1}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 1}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 1}),
 			BinaryEmbedding: "000",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 1}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 1}),
 		},
 		GormItem{
-			Embedding:       pgvector.NewVector([]float32{2, 2, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{2, 2, 2}),
+			Embedding:       pgvectors.NewVector([]float32{2, 2, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{2, 2, 2}),
 			BinaryEmbedding: "101",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{2, 2, 2}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{2, 2, 2}),
 		},
 		GormItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 2}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 2}),
 			BinaryEmbedding: "111",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 2}),
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 2}),
 		},
 	}
 
@@ -65,7 +65,7 @@ func TestGorm(t *testing.T) {
 
 	var items []GormItem
 	db.Clauses(clause.OrderBy{
-		Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []interface{}{pgvector.NewVector([]float32{1, 1, 1})}},
+		Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []interface{}{pgvectors.NewVector([]float32{1, 1, 1})}},
 	}).Limit(5).Find(&items)
 	if items[0].ID != 1 || items[1].ID != 3 || items[2].ID != 2 {
 		t.Error()
@@ -84,7 +84,7 @@ func TestGorm(t *testing.T) {
 	}
 
 	var distances []float64
-	db.Model(&GormItem{}).Select("embedding <-> ?", pgvector.NewVector([]float32{1, 1, 1})).Order("id").Find(&distances)
+	db.Model(&GormItem{}).Select("embedding <-> ?", pgvectors.NewVector([]float32{1, 1, 1})).Order("id").Find(&distances)
 	if distances[0] != 0 || distances[1] != math.Sqrt(3) || distances[2] != 1 {
 		t.Error()
 	}

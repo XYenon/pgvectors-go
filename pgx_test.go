@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"context"
@@ -9,41 +9,41 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pgvector/pgvector-go"
-	pgxvector "github.com/pgvector/pgvector-go/pgx"
+	"github.com/xyenon/pgvectors-go"
+	pgxvectors "github.com/xyenon/pgvectors-go/pgx"
 )
 
 type PgxItem struct {
 	Id              int64
-	Embedding       pgvector.Vector
-	HalfEmbedding   pgvector.HalfVector
+	Embedding       pgvectors.Vector
+	HalfEmbedding   pgvectors.HalfVector
 	BinaryEmbedding string
-	SparseEmbedding pgvector.SparseVector
-	Embeddings      []pgvector.Vector
+	SparseEmbedding pgvectors.SparseVector
+	Embeddings      []pgvectors.Vector
 }
 
 func CreatePgxItems(ctx context.Context, conn *pgx.Conn) {
 	items := []PgxItem{
 		PgxItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 1}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 1}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 1}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 1}),
 			BinaryEmbedding: "000",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 1}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 1})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 1}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 1})},
 		},
 		PgxItem{
-			Embedding:       pgvector.NewVector([]float32{2, 2, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{2, 2, 2}),
+			Embedding:       pgvectors.NewVector([]float32{2, 2, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{2, 2, 2}),
 			BinaryEmbedding: "101",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{2, 2, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{2, 2, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{2, 2, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{2, 2, 2})},
 		},
 		PgxItem{
-			Embedding:       pgvector.NewVector([]float32{1, 1, 2}),
-			HalfEmbedding:   pgvector.NewHalfVector([]float32{1, 1, 2}),
+			Embedding:       pgvectors.NewVector([]float32{1, 1, 2}),
+			HalfEmbedding:   pgvectors.NewHalfVector([]float32{1, 1, 2}),
 			BinaryEmbedding: "111",
-			SparseEmbedding: pgvector.NewSparseVector([]float32{1, 1, 2}),
-			Embeddings:      []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})},
+			SparseEmbedding: pgvectors.NewSparseVector([]float32{1, 1, 2}),
+			Embeddings:      []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})},
 		},
 	}
 
@@ -69,7 +69,7 @@ func TestPgx(t *testing.T) {
 		panic(err)
 	}
 
-	err = pgxvector.RegisterTypes(ctx, conn)
+	err = pgxvectors.RegisterTypes(ctx, conn)
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +91,7 @@ func TestPgx(t *testing.T) {
 
 	CreatePgxItems(ctx, conn)
 
-	rows, err := conn.Query(ctx, "SELECT id, embedding, half_embedding, binary_embedding, sparse_embedding, embeddings, embedding <-> $1 FROM pgx_items ORDER BY embedding <-> $1 LIMIT 5", pgvector.NewVector([]float32{1, 1, 1}))
+	rows, err := conn.Query(ctx, "SELECT id, embedding, half_embedding, binary_embedding, sparse_embedding, embeddings, embedding <-> $1 FROM pgx_items ORDER BY embedding <-> $1 LIMIT 5", pgvectors.NewVector([]float32{1, 1, 1}))
 	if err != nil {
 		panic(err)
 	}
@@ -132,7 +132,7 @@ func TestPgx(t *testing.T) {
 	if !reflect.DeepEqual(items[1].SparseEmbedding.Slice(), []float32{1, 1, 2}) {
 		t.Error()
 	}
-	if !reflect.DeepEqual(items[1].Embeddings, []pgvector.Vector{pgvector.NewVector([]float32{1, 1, 2})}) {
+	if !reflect.DeepEqual(items[1].Embeddings, []pgvectors.Vector{pgvectors.NewVector([]float32{1, 1, 2})}) {
 		t.Error()
 	}
 	if distances[0] != 0 || distances[1] != 1 || distances[2] != math.Sqrt(3) {
@@ -175,7 +175,7 @@ func TestPgx(t *testing.T) {
 		panic(err)
 	}
 	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		return pgxvector.RegisterTypes(ctx, conn)
+		return pgxvectors.RegisterTypes(ctx, conn)
 	}
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	defer pool.Close()
@@ -192,22 +192,22 @@ func TestPgx(t *testing.T) {
 		panic(err)
 	}
 
-	embeddings := []pgvector.Vector{
-		pgvector.NewVector([]float32{1, 2, 3}),
-		pgvector.NewVector([]float32{4, 5, 6}),
+	embeddings := []pgvectors.Vector{
+		pgvectors.NewVector([]float32{1, 2, 3}),
+		pgvectors.NewVector([]float32{4, 5, 6}),
 	}
-	halfEmbeddings := []pgvector.HalfVector{
-		pgvector.NewHalfVector([]float32{1, 2, 3}),
-		pgvector.NewHalfVector([]float32{4, 5, 6}),
+	halfEmbeddings := []pgvectors.HalfVector{
+		pgvectors.NewHalfVector([]float32{1, 2, 3}),
+		pgvectors.NewHalfVector([]float32{4, 5, 6}),
 	}
-	sparseEmbeddings := []pgvector.SparseVector{
-		pgvector.NewSparseVector([]float32{1, 2, 3}),
-		pgvector.NewSparseVector([]float32{4, 5, 6}),
+	sparseEmbeddings := []pgvectors.SparseVector{
+		pgvectors.NewSparseVector([]float32{1, 2, 3}),
+		pgvectors.NewSparseVector([]float32{4, 5, 6}),
 	}
 	row = conn.QueryRow(ctx, "SELECT $1::vector[], $2::halfvec[], $3::sparsevec[]", embeddings, halfEmbeddings, sparseEmbeddings)
-	var scanEmbeddings []pgvector.Vector
-	var scanHalfEmbeddings []pgvector.HalfVector
-	var scanSparseEmbeddings []pgvector.SparseVector
+	var scanEmbeddings []pgvectors.Vector
+	var scanHalfEmbeddings []pgvectors.HalfVector
+	var scanSparseEmbeddings []pgvectors.SparseVector
 	err = row.Scan(&scanEmbeddings, &scanHalfEmbeddings, &scanSparseEmbeddings)
 	if err != nil {
 		panic(err)

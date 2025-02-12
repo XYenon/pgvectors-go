@@ -27,7 +27,7 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}

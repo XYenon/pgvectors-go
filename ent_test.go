@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
-	"github.com/pgvector/pgvector-go"
-	"github.com/pgvector/pgvector-go/ent"
+	"github.com/xyenon/pgvectors-go"
+	"github.com/xyenon/pgvectors-go/ent"
 )
 
 func TestEnt(t *testing.T) {
@@ -35,10 +35,10 @@ func TestEnt(t *testing.T) {
 		panic(err)
 	}
 
-	embedding := pgvector.NewVector([]float32{1, 1, 1})
-	halfEmbedding := pgvector.NewHalfVector([]float32{1, 1, 1})
+	embedding := pgvectors.NewVector([]float32{1, 1, 1})
+	halfEmbedding := pgvectors.NewHalfVector([]float32{1, 1, 1})
 	binaryEmbedding := "000"
-	sparseEmbedding := pgvector.NewSparseVector([]float32{1, 1, 1})
+	sparseEmbedding := pgvectors.NewSparseVector([]float32{1, 1, 1})
 	_, err = client.Item.Create().
 		SetEmbedding(embedding).
 		SetHalfEmbedding(halfEmbedding).
@@ -50,15 +50,15 @@ func TestEnt(t *testing.T) {
 
 	_, err = client.Item.CreateBulk(
 		client.Item.Create().
-			SetEmbedding(pgvector.NewVector([]float32{2, 2, 2})).
-			SetHalfEmbedding(pgvector.NewHalfVector([]float32{2, 2, 2})).
+			SetEmbedding(pgvectors.NewVector([]float32{2, 2, 2})).
+			SetHalfEmbedding(pgvectors.NewHalfVector([]float32{2, 2, 2})).
 			SetBinaryEmbedding("101").
-			SetSparseEmbedding(pgvector.NewSparseVector([]float32{2, 2, 2})),
+			SetSparseEmbedding(pgvectors.NewSparseVector([]float32{2, 2, 2})),
 		client.Item.Create().
-			SetEmbedding(pgvector.NewVector([]float32{1, 1, 2})).
-			SetHalfEmbedding(pgvector.NewHalfVector([]float32{1, 1, 2})).
+			SetEmbedding(pgvectors.NewVector([]float32{1, 1, 2})).
+			SetHalfEmbedding(pgvectors.NewHalfVector([]float32{1, 1, 2})).
 			SetBinaryEmbedding("111").
-			SetSparseEmbedding(pgvector.NewSparseVector([]float32{1, 1, 2})),
+			SetSparseEmbedding(pgvectors.NewSparseVector([]float32{1, 1, 2})),
 	).Save(ctx)
 	if err != nil {
 		panic(err)

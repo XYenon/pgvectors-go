@@ -1,4 +1,4 @@
-package pgvector_test
+package pgvectors_test
 
 import (
 	"encoding/json"
@@ -6,25 +6,25 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pgvector/pgvector-go"
+	"github.com/xyenon/pgvectors-go"
 )
 
 func TestHalfVectorSlice(t *testing.T) {
-	vec := pgvector.NewHalfVector([]float32{1, 2, 3})
+	vec := pgvectors.NewHalfVector([]float32{1, 2, 3})
 	if !reflect.DeepEqual(vec.Slice(), []float32{1, 2, 3}) {
 		t.Error()
 	}
 }
 
 func TestHalfVectorString(t *testing.T) {
-	vec := pgvector.NewHalfVector([]float32{1, 2, 3})
+	vec := pgvectors.NewHalfVector([]float32{1, 2, 3})
 	if fmt.Sprint(vec) != "[1,2,3]" {
 		t.Error()
 	}
 }
 
 func TestHalfVectorParse(t *testing.T) {
-	var vec pgvector.HalfVector
+	var vec pgvectors.HalfVector
 	err := vec.Parse("[1,2,3]")
 	if err != nil {
 		panic(err)
@@ -35,7 +35,7 @@ func TestHalfVectorParse(t *testing.T) {
 }
 
 func TestHalfVectorMarshal(t *testing.T) {
-	vec := pgvector.NewHalfVector([]float32{1, 2, 3})
+	vec := pgvectors.NewHalfVector([]float32{1, 2, 3})
 	data, err := json.Marshal(vec)
 	if err != nil {
 		panic(err)
@@ -46,7 +46,7 @@ func TestHalfVectorMarshal(t *testing.T) {
 }
 
 func TestHalfVectorUnmarshal(t *testing.T) {
-	var vec pgvector.HalfVector
+	var vec pgvectors.HalfVector
 	err := json.Unmarshal([]byte("[1,2,3]"), &vec)
 	if err != nil {
 		panic(err)

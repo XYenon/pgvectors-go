@@ -15,8 +15,8 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pgvector/pgvector-go"
-	pgxvector "github.com/pgvector/pgvector-go/pgx"
+	"github.com/xyenon/pgvectors-go"
+	pgxvectors "github.com/xyenon/pgvectors-go/pgx"
 )
 
 func main() {
@@ -28,12 +28,12 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}
 
-	err = pgxvector.RegisterTypes(ctx, conn)
+	err = pgxvectors.RegisterTypes(ctx, conn)
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	for i, content := range input {
-		_, err := conn.Exec(ctx, "INSERT INTO documents (content, embedding) VALUES ($1, $2)", content, pgvector.NewSparseVectorFromMap(embeddings[i], 30522))
+		_, err := conn.Exec(ctx, "INSERT INTO documents (content, embedding) VALUES ($1, $2)", content, pgvectors.NewSparseVectorFromMap(embeddings[i], 30522))
 		if err != nil {
 			panic(err)
 		}
@@ -70,7 +70,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	rows, err := conn.Query(ctx, "SELECT content FROM documents ORDER BY embedding <#> $1 LIMIT 5", pgvector.NewSparseVectorFromMap(queryEmbeddings[0], 30522))
+	rows, err := conn.Query(ctx, "SELECT content FROM documents ORDER BY embedding <#> $1 LIMIT 5", pgvectors.NewSparseVectorFromMap(queryEmbeddings[0], 30522))
 	if err != nil {
 		panic(err)
 	}
