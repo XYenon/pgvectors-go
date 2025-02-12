@@ -58,11 +58,11 @@ func CreatePgItems(db *pg.DB) {
 func TestPg(t *testing.T) {
 	db := pg.Connect(&pg.Options{
 		User:     os.Getenv("USER"),
-		Database: "pgvector_go_test",
+		Database: "pgvectors_go_test",
 	})
 	defer db.Close()
 
-	db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+	db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 	db.Exec("DROP TABLE IF EXISTS pg_items")
 
 	err := db.Model((*PgItem)(nil)).CreateTable(&orm.CreateTableOptions{})

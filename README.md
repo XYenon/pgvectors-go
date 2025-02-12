@@ -396,7 +396,7 @@ To get started with development:
 git clone https://github.com/xyenon/pgvectors-go.git
 cd pgvectors-go
 go mod tidy
-createdb pgvector_go_test
+createdb pgvectors_go_test
 go generate ./ent
 go test -v
 ```

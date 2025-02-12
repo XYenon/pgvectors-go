@@ -58,13 +58,13 @@ func CreatePgxItems(ctx context.Context, conn *pgx.Conn) {
 func TestPgx(t *testing.T) {
 	ctx := context.Background()
 
-	conn, err := pgx.Connect(ctx, "postgres://localhost/pgvector_go_test")
+	conn, err := pgx.Connect(ctx, "postgres://localhost/pgvectors_go_test")
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = conn.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}
@@ -170,7 +170,7 @@ func TestPgx(t *testing.T) {
 		panic(err)
 	}
 
-	config, err := pgxpool.ParseConfig("postgres://localhost/pgvector_go_test")
+	config, err := pgxpool.ParseConfig("postgres://localhost/pgvectors_go_test")
 	if err != nil {
 		panic(err)
 	}

@@ -49,12 +49,12 @@ func CreateGormItems(db *gorm.DB) {
 }
 
 func TestGorm(t *testing.T) {
-	db, err := gorm.Open(postgres.Open("dbname=pgvector_go_test"), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open("dbname=pgvectors_go_test"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+	db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 	db.Exec("DROP TABLE IF EXISTS gorm_items")
 
 	db.AutoMigrate(&GormItem{})

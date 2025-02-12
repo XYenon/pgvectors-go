@@ -1,12 +1,14 @@
 name: build
 on: [push, pull_request]
 jobs:
-  build:
+  build-pgvecto-rs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         go: ["1.23", "1.22", "1.21"]
+        postgres: ["16", "15"]
+        pgvecto-rs: ["0.4.0", "0.3.0"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -16,13 +18,46 @@ jobs:
       - run: go mod tidy
       - uses: ankane/setup-postgres@v1
         with:
-          database: pgvector_go_test
+          postgres-version: ${{ matrix.postgres }}
+          database: pgvectors_go_test
           dev-files: true
       - run: |
+          curl -Lo vectors.zip 'https://github.com/tensorchord/pgvecto.rs/releases/download/v${{ matrix.pgvecto-rs }}/vectors-pg${{ matrix.postgres }}_x86_64-unknown-linux-gnu_${{ matrix.pgvecto-rs }}.zip'
+          unzip vectors.zip -d vectors
+          sudo cp vectors/vectors.so "$(pg_config --pkglibdir)/"
+          sudo cp vectors/vectors--* "$(pg_config --sharedir)/extension/"
+          sudo cp vectors/vectors.control "$(pg_config --sharedir)/extension/"
+          sudo -u postgres psql -c 'ALTER SYSTEM SET shared_preload_libraries = "vectors.so"'
+          sudo -u postgres psql -c 'ALTER SYSTEM SET search_path TO "$user", public, vectors'
+          sudo systemctl restart 'postgresql@${{ matrix.postgres }}-main.service'
+      - run: go generate ./ent && go mod tidy
+      - run: go test -v
+  build-pgvector:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.23", "1.22", "1.21"]
+        postgres: ["16", "15"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false # depends on go.sum
+      - run: go mod tidy
+      - uses: ankane/setup-postgres@v1
+        with:
+          postgres-version: ${{ matrix.postgres }}
+          database: pgvectors_go_test
+          dev-files: true
+      - run: |
+          sed -i 's/CREATE EXTENSION IF NOT EXISTS vectors/CREATE EXTENSION IF NOT EXISTS vector/' *_test.go
+          export PG_CONFIG='/usr/lib/postgresql/${{ matrix.postgres }}/bin/pg_config'
           cd /tmp
           git clone --branch v0.8.0 https://github.com/pgvector/pgvector.git
           cd pgvector
           make
-          sudo make install
+          sudo --preserve-env=PG_CONFIG make install
       - run: go generate ./ent && go mod tidy
       - run: go test -v

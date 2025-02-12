@@ -14,13 +14,13 @@ import (
 func TestEnt(t *testing.T) {
 	ctx := context.Background()
 
-	client, err := ent.Open("postgres", "postgres://localhost/pgvector_go_test?sslmode=disable")
+	client, err := ent.Open("postgres", "postgres://localhost/pgvectors_go_test?sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
 	defer client.Close()
 
-	_, err = client.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS vector")
+	_, err = client.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS vectors")
 	if err != nil {
 		panic(err)
 	}

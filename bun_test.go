@@ -72,14 +72,14 @@ func TestBun(t *testing.T) {
 	ctx := context.Background()
 
 	pgconn := pgdriver.NewConnector(
-		pgdriver.WithDatabase("pgvector_go_test"),
+		pgdriver.WithDatabase("pgvectors_go_test"),
 		pgdriver.WithUser(os.Getenv("USER")),
 		pgdriver.WithTLSConfig(nil), // sslmode=disable
 	)
 	sqldb := sql.OpenDB(pgconn)
 	db := bun.NewDB(sqldb, pgdialect.New())
 
-	db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
+	db.Exec("CREATE EXTENSION IF NOT EXISTS vectors")
 	db.Exec("DROP TABLE IF EXISTS bun_items")
 
 	_, err := db.NewCreateTable().Model((*BunItem)(nil)).Exec(ctx)

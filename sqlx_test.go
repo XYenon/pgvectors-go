@@ -46,9 +46,9 @@ func CreateSqlxItems(db *sqlx.DB) {
 }
 
 func TestSqlx(t *testing.T) {
-	db := sqlx.MustConnect("postgres", "dbname=pgvector_go_test sslmode=disable")
+	db := sqlx.MustConnect("postgres", "dbname=pgvectors_go_test sslmode=disable")
 
-	db.MustExec("CREATE EXTENSION IF NOT EXISTS vector")
+	db.MustExec("CREATE EXTENSION IF NOT EXISTS vectors")
 	db.MustExec("DROP TABLE IF EXISTS sqlx_items")
 
 	db.MustExec("CREATE TABLE sqlx_items (id bigserial PRIMARY KEY, embedding vector(3), halfembedding halfvec(3), binaryembedding bit(3), sparseembedding sparsevec(3))")
